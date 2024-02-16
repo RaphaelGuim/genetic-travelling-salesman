@@ -1,10 +1,10 @@
 # Genetic Travelling Salesman
-Using Genetic Algorithm to solve the Travelling Salesman problem.
+Utilizing Genetic Algorithm to Solve the Travelling Salesman Problem.
 
-See the Algorithm working [here!](https://raphaelguim.github.io/genetic-travelling-salesman/)
+See the Algorithm in Action [here!](https://raphaelguim.github.io/genetic-travelling-salesman/)
 
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+We welcome pull requests. For significant changes, please initiate a discussion by opening an issue first to discuss your proposed modifications.
 
 
