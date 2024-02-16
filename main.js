@@ -192,17 +192,35 @@ function evaluateAnswer(answer) {
 function draw() {
   background("black");
 
-  views.forEach((view) => {
-    push();
-    translate(view[0], view[1]);
-    fill(view[4]);
-    rect(0, 0, view[2], view[3]);
-    textSize(20);
-    fill("black");
-    text(view[5], 20, 20);
-    pop();
-  });
+ 
+  drawViews()
+  drawLocations()
+  getBestScore()
+  createNewGeneration();
+  sortByScore(); 
+  drawBest();
+  drawActualBest();
+  drawData();
 
+  //Adding Best Score to Score list
+  scores.push(generation[0].score);
+
+  //Clear Score list
+  if (scores.length > 500) {
+    scores = scores.splice(500);
+  }
+
+  //Reset Mutations
+  mutations = 0;
+}
+
+function getBestScore(){
+  if (generation[0].score < bestScore) {
+    best = generation[0].gen.slice();
+    bestScore = generation[0].score;
+  }
+}
+function drawLocations(){
   locations.forEach((location, index) => {
     circle(location.position.x, location.position.y, locationRadius);
     if (debug) {
@@ -216,26 +234,19 @@ function draw() {
   });
 
   text(`Num of Locations: ${slider.value()}`,20,40)
+}
 
-  createNewGeneration();
-  sortByScore();
-
-  if (generation[0].score < bestScore) {
-    best = generation[0].gen.slice();
-    bestScore = generation[0].score;
-  }
-  drawBest();
-  drawActualBest();
-  drawData();
-  scores.push(generation[0].score);
-
-  if (scores.length > 500) {
-    scores = scores.splice(1000);
-  }
-  mutations = 0;
-  // noLoop()
-
-  
+function drawViews(){
+  views.forEach((view) => {
+    push();
+    translate(view[0], view[1]);
+    fill(view[4]);
+    rect(0, 0, view[2], view[3]);
+    textSize(20);
+    fill("black");
+    text(view[5], 20, 20);
+    pop();
+  });
 }
 
 
@@ -301,7 +312,6 @@ function drawData() {
   textSize(20)
   text(`Possibilities: ${numOfLocations}! = ${factorial(numOfLocations)}`, 20, 60);
   text(`Mutation Rate: ${round(radiation,2)}`, 20, 80);
-
   text(`AVG: ${medium}`, 20, 100);
   text(`Generation ${frameCount}`, 20, 120);
   text(`Mutations ${mutations}`, 20, 140);
