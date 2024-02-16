@@ -1,8 +1,7 @@
 # Genetic Travelling Salesman
 Using Genetic Algorithm to solve the Travelling Salesman problem.
 
-See the Algorithm working here:
-[https://raphaelguim.github.io/genetic-aquarium/index.html](https://raphaelguim.github.io/genetic-travelling-salesman/)
+See the Algorithm working [here!](https://raphaelguim.github.io/genetic-travelling-salesman/)
 
 
 ## Contributing
