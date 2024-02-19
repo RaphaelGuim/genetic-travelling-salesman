@@ -1,5 +1,5 @@
-const locationRadius = 20;
-let numOfLocations = 50;
+const locationRadius = 25;
+let numOfLocations = 30;
 const generationSize = 1000;
 const bestPercent = 10;
 
@@ -12,14 +12,14 @@ let generation = [];
 let best = null;
 let bestScore = Infinity;
 
-let radiation = 0.75;
+let radiation = 0.9;
 let medium = Infinity;
 let mutations = 0;
 let slider;
 let button = null;
 let bestSpecies = [];
 let generationBest = null;
-let maxCombinations = 0
+let maxCombinations = 0;
 class Location {
   constructor(x, y) {
     this.position = createVector(x, y);
@@ -64,7 +64,8 @@ function newGen() {
   let parent = bestSpecies[index];
 
   if (!parent) {
-    parent = generation[0];
+    let gen = shuffle([...Array(numOfLocations).keys()]);
+    parent = new Specie(gen);
   }
   let gen = mutate(parent.gen.slice());
   return gen;
@@ -73,7 +74,7 @@ function newGen() {
 function getBest() {
   let generationBests = generation
     .slice(0, ceil(generationSize * (bestPercent / 100)))
-    .concat(bestSpecies);
+    .concat(bestSpecies.slice(0, bestSpecies.length / 2));
 
   generationBests.sort((a, b) => a.score - b.score);
   generationBests = clearIdentical(generationBests);
@@ -113,7 +114,7 @@ function createNewGeneration() {
 function setup() {
   canvas = createCanvas(window.innerWidth, window.innerHeight);
 
-  slider = createSlider(5, 50, numOfLocations, 1);
+  slider = createSlider(5, 30, numOfLocations, 1);
   slider.position(20, 45);
   slider.size(100);
 
@@ -136,18 +137,40 @@ function setup() {
   button.position(150, 2);
 
   button.mousePressed(() => {
+    maxCombinations = 0;
     generation = [];
     locations = [];
     bestSpecies = [];
+    generationBest = null;
     numOfLocations = slider.value();
+
     create_locations(numOfLocations);
     createNewGeneration();
 
     best = generation[0];
+    best.generation = 0;
     bestScore = Infinity;
+
+    maxCombinations = factorial(numOfLocations);
   });
 
-  maxCombinations = factorial(numOfLocations)
+  maxCombinations = factorial(numOfLocations);
+}
+
+function geneticSalesman() {
+  bestSpecies = getBest();
+
+  createNewGeneration();
+
+  getBestScore();
+
+  //Adding Best Score to Score list
+  scores.push(generation[0].score);
+
+  //Clear Score list
+  if (scores.length > 500) {
+    scores = scores.slice(1);
+  }
 }
 
 function create_views() {
@@ -191,41 +214,32 @@ function evaluateAnswer(answer) {
   return totalDistance;
 }
 let time = 0;
+
+let loop = true;
+
 function draw() {
   time += deltaTime;
+
   if (time > 1000) {
     generationBest = generation[0];
     time = 0;
   }
   background("black");
 
-  drawViews();
-  drawLocations();
-  bestSpecies = getBest();
-
-  createNewGeneration();
-
-  getBestScore();
-
-  drawBest();
-  drawActualBest();
-  drawData();
-
-  //Adding Best Score to Score list
-  scores.push(generation[0].score);
-
-  //Clear Score list
-  if (scores.length > 1000) {
-    scores = scores.splice(1);
+  if (maxCombinations) {
+    drawViews();
+    drawLocations();
+    geneticSalesman();
+    drawBest();
+    drawActualBest();
+    drawData();
   }
-
-  //Reset Mutations
-  mutations = 0;
 }
 
 function getBestScore() {
   if (generation[0].score < bestScore) {
     best = generation[0];
+    best.generation = frameCount;
     bestScore = generation[0].score;
   }
 }
@@ -284,6 +298,7 @@ function drawBest() {
   });
   fill("black");
   text(`Score: ${round(best.score)}`, 20, 50);
+  text(`Generation: ${best.generation}`, 20, 65);
 
   text(`${best.gen}`, 20, 35);
   pop();
@@ -291,49 +306,51 @@ function drawBest() {
 
 function drawActualBest() {
   medium = round(average(scores));
-
-  radiation = round(bestScore) / medium;
-  if (radiation > 0.99) {
-    radiation = 0.9;
+  if (frameCount % 200 == 0) {
+    radiation = round(bestScore) / medium;
+    if (radiation > 0.95) {
+      radiation = 0.85;
+    }
+    if (radiation < 0.75) {
+      radiation = 0.9;
+    }
   }
-  if (radiation < 0.75) {
-    radiation = 0.9;
+
+  if (generationBest) {
+    push();
+    translate(views[2][0], views[2][1]);
+    noFill();
+
+    beginShape();
+    generationBest.gen.forEach((g) => {
+      vertex(locations[g].position.x, locations[g].position.y);
+    });
+
+    endShape();
+
+    fill("white");
+
+    locations.forEach((location, index) => {
+      circle(location.position.x, location.position.y, locationRadius);
+    });
+    fill("black");
+    text(`Score: ${round(generationBest.score)}`, 20, 50);
+
+    text(`${generationBest.gen}`, 20, 35);
+    pop();
   }
-
-  push();
-  translate(views[2][0], views[2][1]);
-  noFill();
-  beginShape();
-
-  generationBest.gen.forEach((g) => {
-    vertex(locations[g].position.x, locations[g].position.y);
-  });
-
-  endShape();
-
-  fill("white");
-
-  locations.forEach((location, index) => {
-    circle(location.position.x, location.position.y, locationRadius);
-  });
-  fill("black");
-  text(`Score: ${round(generationBest.score)}`, 20, 50);
-
-  text(`${generationBest.gen}`, 20, 35);
-  pop();
 }
 
 function drawData() {
   push();
   translate(views[3][0], views[3][1]);
   textSize(20);
-  text(
-    `Possibilities: ${numOfLocations}! = ${maxCombinations}`,
-    20,
-    60
-  );
+  text(`Possibilities: ${numOfLocations}! = ${maxCombinations}`, 20, 60);
   text(`Radiation: ${int(round(1 - radiation, 2) * 100)}%`, 20, 80);
   text(`AVG: ${medium}`, 20, 100);
   text(`Generation ${frameCount}`, 20, 120);
+  text(`Mutations ${mutations}`, 20, 140);
+  //Reset Mutations
+  mutations = 0;
   pop();
 }
