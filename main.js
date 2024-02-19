@@ -20,6 +20,7 @@ let button = null;
 let bestSpecies = [];
 let generationBest = null;
 let maxCombinations = 0;
+let generationNumber = 0
 class Location {
   constructor(x, y) {
     this.position = createVector(x, y);
@@ -143,7 +144,7 @@ function setup() {
     bestSpecies = [];
     generationBest = null;
     numOfLocations = slider.value();
-
+    generationNumber = 0
     create_locations(numOfLocations);
     createNewGeneration();
 
@@ -218,6 +219,7 @@ let time = 0;
 let loop = true;
 
 function draw() {
+  generationNumber++
   if(frameCount > 10000){
     noLoop()
   }
@@ -242,7 +244,7 @@ function draw() {
 function getBestScore() {
   if (generation[0].score < bestScore) {
     best = generation[0];
-    best.generation = frameCount;
+    best.generation = generationNumber;
     bestScore = generation[0].score;
   }
 }
@@ -351,7 +353,7 @@ function drawData() {
   text(`Possibilities: ${numOfLocations}! = ${maxCombinations}`, 20, 60);
   text(`Radiation: ${int(round(1 - radiation, 2) * 100)}%`, 20, 80);
   text(`AVG: ${medium}`, 20, 100);
-  text(`Generation ${frameCount}`, 20, 120);
+  text(`Generation ${generationNumber}`, 20, 120);
   text(`Mutations ${mutations}`, 20, 140);
   //Reset Mutations
   mutations = 0;
