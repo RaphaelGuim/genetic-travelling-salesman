@@ -75,7 +75,7 @@ function newGen() {
 function getBest() {
   let generationBests = generation
     .slice(0, ceil(generationSize * (bestPercent / 100)))
-    .concat(bestSpecies.slice(0, bestSpecies.length / 2));
+    .concat(bestSpecies.slice(0, bestSpecies.length*2/3));
 
   generationBests.sort((a, b) => a.score - b.score);
   generationBests = clearIdentical(generationBests);
@@ -310,16 +310,6 @@ function drawBest() {
 }
 
 function drawActualBest() {
-  medium = round(average(scores));
-  if (frameCount % 200 == 0) {
-    radiation = round(bestScore) / medium;
-    if (radiation > 0.95) {
-      radiation = 0.7;
-    }
-    if (radiation < 0.75) {
-      radiation = 0.9;
-    }
-  }
 
   if (generationBest) {
     push();
@@ -347,6 +337,25 @@ function drawActualBest() {
 }
 
 function drawData() {
+
+  medium = round(average(scores));
+  if (frameCount % 100 == 0) {
+ 
+    let newRadiation = round(bestScore) / medium;
+    // Change Radiation a small value
+    if(newRadiation < radiation){
+      radiation-= 0.01
+    }
+    else{
+      radiation+= 0.01
+    }
+
+    if (radiation > 0.90 || radiation < 0.75) {
+      radiation = 0.80;
+    }
+  }
+
+
   push();
   translate(views[3][0], views[3][1]);
   textSize(20);
