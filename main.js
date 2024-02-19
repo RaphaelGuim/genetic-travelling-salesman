@@ -1,6 +1,6 @@
 const locationRadius = 25;
 let numOfLocations = 30;
-const generationSize = 1000;
+const generationSize = 2000;
 const bestPercent = 10;
 
 const debug = true;
@@ -218,6 +218,9 @@ let time = 0;
 let loop = true;
 
 function draw() {
+  if(frameCount > 10000){
+    noLoop()
+  }
   time += deltaTime;
 
   if (time > 1000) {
@@ -309,7 +312,7 @@ function drawActualBest() {
   if (frameCount % 200 == 0) {
     radiation = round(bestScore) / medium;
     if (radiation > 0.95) {
-      radiation = 0.85;
+      radiation = 0.7;
     }
     if (radiation < 0.75) {
       radiation = 0.9;
