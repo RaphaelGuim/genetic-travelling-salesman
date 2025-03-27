@@ -41,7 +41,7 @@ const palette = {
 	textHighlight: "rgba(120, 255, 180, 1)",        // Genoma / dados importantes
 
 	// Fundos dos textos
-	backgroundPrimary: "rgba(25, 30, 60, 0.75)",    // Fundo padrão elegante
+	backgroundPrimary: "rgba(25, 30, 60, 1)",    // Fundo padrão elegante
 	backgroundSecondary: "rgba(30, 30, 60, 0.6)",   // Fundo alternativo para variação
 	backgroundGlass: "rgba(255, 255, 255, 0.08)",   // Fundo estilo vidro fosco
 	backgroundHighlight: "rgba(0, 255, 180, 0.15)", // Fundo temático opcional (verde água)
@@ -102,11 +102,34 @@ function createNewGeneration(bestSpecies, generationSize, radiation) {
 
 	return [new Specie(bestSPC.gen), ...generation]
 }
+function getDarkColorForView(index) {
+	const darkPalette = [
+		0x1a1a2e,// roxo escuro - view 2
+		0x0c0f1a, // azul escuro - view 0
+		0x111111, // preto fosco - view 1
 
+		0x101820  // verde petróleo escuro - view 3 (caso use)
+	];
+	return darkPalette[index] || 0x000000;
+}
 
 function createScenes() {
 	views.forEach((view, i) => {
 		const scene = new THREE.Scene();
+
+		const darkBackground = new THREE.Mesh(
+			new THREE.PlaneGeometry(3000, 3000),
+			new THREE.MeshBasicMaterial({
+				color: getDarkColorForView(i),  // função que define cor por view
+				// transparent: true,
+				opacity: 0.95,
+				depthWrite: false
+			})
+		);
+		darkBackground.position.z = -9; // posiciona no fundo
+
+
+		scene.add(darkBackground);
 
 		scene.add(new THREE.PointLight(0xffffff, 1, 2000).position.set(0, 0, CAMERA_Z));
 		let ambientLight = new THREE.AmbientLight(0x888888)
@@ -124,6 +147,10 @@ function createScenes() {
 
 		yPosition += tilt
 		if (i == 0) {
+			addText(`Click on views to Zoom!`, xPosition, yPosition, zPosition, scene, 54, "rgba(49, 196, 80, 0.8)", palette.backgroundPrimary)
+			yPosition += tilt;
+			addText(`We are using an approach based on genetic algorithms.`, xPosition, yPosition, zPosition, scene, 54, palette.textSecondary, palette.backgroundPrimary)
+			yPosition += tilt;
 			addText(`The goal is to find the shortest possible route.`, xPosition, yPosition, zPosition, scene, 54, palette.textSecondary, palette.backgroundPrimary)
 			yPosition += tilt;
 			addText(`A traveling salesman needs to visit a list of cities`, xPosition, yPosition, zPosition, scene, 54, palette.textSecondary, palette.backgroundPrimary)
@@ -385,8 +412,6 @@ function loop() {
 
 	radiation = updateRadiation(radiation, generationNumber, bestSPC.score, scores)
 
-
-
 	generationNumber++;
 
 	generation = createNewGeneration(bestSpecies, generationSize, radiation)
@@ -420,7 +445,7 @@ window.onload = () => {
 	createScenes();
 	init()
 };
-let zoomedViewIndex = null; // null = layout padrão
+let zoomedViewIndex = null;
 window.addEventListener("click", (event) => {
 	for (let i = 0; i < views.length; i++) {
 		const view = views[i];
@@ -439,10 +464,6 @@ window.addEventListener("click", (event) => {
 			break;
 		}
 	}
-
-
-
-
 });
 
 function toggleZoom(viewIndex) {
@@ -497,10 +518,6 @@ function init() {
 	drawPath(1, bestSPC.gen);
 	drawPath(2, generation[0].gen);
 	loop();
-
-
-
-
 }
 
 function addText(textString, x, y, z, scene, fontSize, color, bgColor) {
@@ -530,7 +547,7 @@ function updateDataLabels() {
 	addText(`Possibilities: ${numOfLocations}! = ${factorial(numOfLocations)}`, xPosition, yPosition, zPosition, scene, 54, palette.textSecondary, palette.backgroundPrimary)
 	yPosition -= tilt;
 
-	addText(`Radiation: ${radiation}`, xPosition, yPosition, zPosition, scene, 54, palette.textSecondary, palette.backgroundPrimary)
+	addText(`Radiation: ${Math.round(radiation * 1000) / 1000}`, xPosition, yPosition, zPosition, scene, 54, palette.textSecondary, palette.backgroundPrimary)
 	yPosition -= tilt;
 
 	addText(`AVG: ${Math.round(medium)}`, xPosition, yPosition, zPosition, scene, 54, palette.textSecondary, palette.backgroundPrimary)

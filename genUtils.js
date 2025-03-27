@@ -9,7 +9,6 @@ function newGen(index, bestSpecies, radiation) {
 
 
 function mutate(gen, radiation) {
-
     for (let i = 0; i < gen.length; i++) {
         if (Math.random() > radiation) {
 
@@ -18,7 +17,6 @@ function mutate(gen, radiation) {
             [gen[a], gen[b]] = [gen[b], gen[a]];
         }
     }
-
     return gen;
 }
 
